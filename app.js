@@ -2,6 +2,10 @@ const express = require("express");
 const app = express();
 const sqlite3 = require('sqlite3').verbose()
 
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, console.log(`Server started on port ${PORT}`));
+
 let db = new sqlite3.Database('./compras.db',(err)=>{
     if(err){
         console.log(error.message)
@@ -22,6 +26,10 @@ db.all(sql, [], (err, rows) => {
         somaPrecos = somaPrecos + row['preco'];
     });
     console.log(somaPrecos);
+});
+
+app.get("/", (req, res) => {
+    res.send(`${somaPrecos}`);
 });
 
 db.close((err) => {
