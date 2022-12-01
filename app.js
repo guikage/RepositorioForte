@@ -1,9 +1,12 @@
 const express = require("express");
 const app = express();
 const sqlite3 = require('sqlite3').verbose()
+const cors = require("cors");
 
+app.use(cors());
+app.use(express.json());
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, console.log(`Server started on port ${PORT}`));
 
 let db = new sqlite3.Database('./compras.db',(err)=>{
@@ -13,28 +16,28 @@ let db = new sqlite3.Database('./compras.db',(err)=>{
     console.log('connected to database')
 });
 
-let sql = 'SELECT * FROM compras';
+let sql = "SELECT * FROM compras";
+let soma = "SELECT FORMAT(SUM(preco), 2) AS 'total' FROM compras";
 
 let somaPrecos = 0;
 
-db.all(sql, [], (err, rows) => {
-    if(err){
-        throw err;
-    }
-    rows.forEach((row) => {
-        console.log(row);
-        somaPrecos = somaPrecos + row['preco'];
+
+app.get("/items", (req, res) => {
+    db.all(sql, [], (err, rows) => {
+        if(err){
+            throw err;
+        } else {
+            res.send(rows);
+        }
     });
-    console.log(somaPrecos);
 });
 
-app.get("/", (req, res) => {
-    res.send(`${somaPrecos}`);
-});
-
-db.close((err) => {
-    if(err){
-        throw err;
-    }
-    console.log('connection closed');
+app.get("/sum", (req, res) => {
+    db.all(soma, (err, somaprecos) => {
+        if(err){
+            throw err;
+        } else {
+            res.send(somaprecos);
+        }
+    });
 });
